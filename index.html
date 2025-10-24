@@ -211,14 +211,52 @@
             color: #f83d03; /* Laranja Jamildo */
         }
 
-        /* --- CAMADA 3: O BOTÃO DE AÇÃO --- */
-        .action-button {
+        /* --- CAMADA 3: INFORMAÇÕES ADICIONAIS (PÓS-ANIMAÇÃO) --- */
+        .info-boxes-wrapper {
+            position: absolute;
+            bottom: 90px; /* Posição acima do botão */
+            width: 100%;
+            padding: 0 20px;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            z-index: 90;
+            opacity: 0; /* Começa escondido */
+            transform: translateY(20px);
+            transition: all 0.5s 0.2s ease-out; /* Delay de 0.2s */
+        }
+        .info-boxes-wrapper.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .info-box {
+            background: rgba(255, 255, 255, 0.05);
+            -webkit-backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            padding: 10px 15px;
+            color: #FFF;
+            text-align: center;
+            width: 160px;
+        }
+        .info-box h4 {
+            font-size: 0.8rem;
+            font-weight: 700;
+            opacity: 0.7;
+            margin-bottom: 5px;
+        }
+        .info-box .value {
+            font-size: 1.8rem;
+            font-weight: 900;
+        }
+
+        /* --- CAMADA 4: OS BOTÕES DE AÇÃO --- */
+        .action-button, .reset-button {
             font-family: 'Inter', sans-serif;
             font-size: 1.1rem;
             font-weight: 700;
             letter-spacing: 0.5px;
-            color: #024796; /* Azul no texto */
-            background-color: #f83d03; /* Laranja no fundo */
             border: none;
             padding: 15px 30px;
             cursor: pointer;
@@ -229,6 +267,11 @@
             position: absolute;
             bottom: 30px;
             z-index: 100;
+        }
+
+        .action-button {
+            color: #024796; /* Azul no texto */
+            background-color: #f83d03; /* Laranja no fundo */
             box-shadow: 0 5px 20px rgba(248, 61, 3, 0.3);
         }
         .action-button:hover {
@@ -241,6 +284,19 @@
             cursor: not-allowed;
             opacity: 0.7;
             box-shadow: none;
+        }
+
+        /* Botão "Ver de Novo" */
+        .reset-button {
+            display: none; /* Começa escondido */
+            color: #FFF;
+            background-color: transparent;
+            border: 2px solid #f83d03;
+        }
+        .reset-button:hover {
+            background-color: #f83d03;
+            color: #024796;
+            transform: scale(1.02);
         }
 
     </style>
@@ -319,9 +375,28 @@
 
         </div>
         
-        <!-- Botão de Ação -->
+        <!-- Informações Adicionais (Pós-Animação) -->
+        <div class="info-boxes-wrapper" id="info-boxes">
+            <div class="info-box">
+                <h4>Aprova Desempenho</h4>
+                <div class="value" id="info-aprova">51.2%</div>
+            </div>
+            <div class="info-box">
+                <h4>Desaprova</h4>
+                <div class="value" id="info-desaprova">48.1%</div>
+            </div>
+            <div class="info-box">
+                <h4>Regular (Gov.)</h4>
+                <div class="value" id="info-regular">4.8%</div>
+            </div>
+        </div>
+
+        <!-- Botões de Ação -->
         <button class="action-button" id="update-btn">
             IGNIÇÃO! (Ver Virada de Outubro)
+        </button>
+        <button class="reset-button" id="reset-btn">
+            VER DE NOVO
         </button>
 
     </div>
@@ -332,7 +407,13 @@
         // 1. DADOS DA PESQUISA
         const data = {
             setembro: { pos: 46.2, neg: 48.0 },
-            outubro: { pos: 48.0, neg: 47.2 }
+            outubro: { 
+                pos: 48.0, 
+                neg: 47.2,
+                aprova: 51.2,
+                desaprova: 48.1,
+                regular: 4.8
+            }
         };
 
         // 2. REFERÊNCIAS DO DOM
@@ -341,8 +422,16 @@
         const valuePos = document.getElementById('value-pos');
         const valueNeg = document.getElementById('value-neg');
         const updateBtn = document.getElementById('update-btn');
+        const resetBtn = document.getElementById('reset-btn'); // Botão Voltar
         const canvas = document.getElementById('particle-canvas');
         const ctx = canvas.getContext('2d');
+        
+        // Caixas de info adicionais
+        const infoBoxesWrapper = document.getElementById('info-boxes');
+        const infoAprova = document.getElementById('info-aprova');
+        const infoDesaprova = document.getElementById('info-desaprova');
+        const infoRegular = document.getElementById('info-regular');
+
 
         let isLaunched = false;
 
@@ -393,7 +482,7 @@
         }
         
         // 4. FUNÇÃO DE ANIMAÇÃO DE CONTAGEM (Zelo)
-        function animateValue(element, start, end, duration) {
+        function animateValue(element, start, end, duration, delay = 0, suffix = '%') {
             let startTimestamp = null;
             const step = (timestamp) => {
                 if (!startTimestamp) startTimestamp = timestamp;
@@ -401,18 +490,16 @@
                 // Curva de "ease-out" para a contagem
                 const easeOutProgress = 1 - Math.pow(1 - progress, 3);
                 const currentValue = easeOutProgress * (end - start) + start;
-                element.textContent = currentValue.toFixed(1) + "%";
+                element.textContent = currentValue.toFixed(1) + suffix;
                 if (progress < 1) {
                     window.requestAnimationFrame(step);
                 }
             };
             
-            // CORREÇÃO: Adicionando o delay de volta (1000ms)
-            // A animação do número só começa após 1s,
-            // sincronizando com a chegada dos foguetes (que dura 2.5s)
+            // Adiciona o delay (atraso)
             setTimeout(() => {
                 window.requestAnimationFrame(step);
-            }, 1000); 
+            }, delay); 
         }
 
         // 5. FUNÇÃO PRINCIPAL DA "VIRADA" (Regra: Interação como Ponto de Virada)
@@ -424,20 +511,52 @@
             updateBtn.textContent = "EM ASCENSÃO...";
             updateBtn.disabled = true;
 
-            // 1. Animar os Números (com o delay corrigido)
-            animateValue(valuePos, data.setembro.pos, data.outubro.pos, 1500);
-            animateValue(valueNeg, data.setembro.neg, data.outubro.neg, 1500);
+            // 1. Animar os Números (com o delay corrigido de 1000ms)
+            animateValue(valuePos, data.setembro.pos, data.outubro.pos, 1500, 1000);
+            animateValue(valueNeg, data.setembro.neg, data.outubro.neg, 1500, 1000);
 
             // 2. Animar os Foguetes (CSS)
             wrapperPos.classList.add('launched');
             wrapperNeg.classList.add('launched');
             
+            // 3. Ao final da animação (2.5s)
             setTimeout(() => {
-                updateBtn.textContent = "VIRADA CONCLUÍDA";
+                // Troca os botões
+                updateBtn.style.display = 'none';
+                resetBtn.style.display = 'block';
+
+                // Mostra as caixas de informação adicionais
+                infoAprova.textContent = data.outubro.aprova.toFixed(1) + "%";
+                infoDesaprova.textContent = data.outubro.desaprova.toFixed(1) + "%";
+                infoRegular.textContent = data.outubro.regular.toFixed(1) + "%";
+                infoBoxesWrapper.classList.add('visible');
+
             }, 2500);
         }
 
-        // 6. INICIALIZAÇÃO
+        // 6. FUNÇÃO DE RESET (VER DE NOVO)
+        function resetAnimation() {
+            isLaunched = false;
+
+            // Esconde caixas de info
+            infoBoxesWrapper.classList.remove('visible');
+
+            // Reseta foguetes (remove classe)
+            wrapperPos.classList.remove('launched');
+            wrapperNeg.classList.remove('launched');
+            
+            // Reseta números para Setembro
+            valuePos.textContent = data.setembro.pos.toFixed(1) + "%";
+            valueNeg.textContent = data.setembro.neg.toFixed(1) + "%";
+
+            // Troca os botões
+            resetBtn.style.display = 'none';
+            updateBtn.style.display = 'block';
+            updateBtn.disabled = false;
+            updateBtn.textContent = "IGNIÇÃO! (Ver Virada de Outubro)";
+        }
+
+        // 7. INICIALIZAÇÃO
         window.onload = () => {
             // Define os valores iniciais (Setembro) assim que a página carrega
             valuePos.textContent = data.setembro.pos.toFixed(1) + "%";
@@ -446,6 +565,7 @@
             createParticles();
             animateParticles();
             updateBtn.addEventListener('click', launch);
+            resetBtn.addEventListener('click', resetAnimation); // Adiciona evento ao botão reset
         };
 
     </script>
