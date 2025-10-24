@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Infográfico: Aprovação Governo Lula (Atlas)</title>
+    <!-- Fonte (Regra Jamildo) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* CSS Reset Básico */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* --- CAMADA 1: O DESIGN "FORA DA CAIXA" V2 (INOVAÇÃO REAL) --- */
+        
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            background: #111; /* Fundo neutro escuro */
+        }
+
+        /* 1.1: Contêiner Principal (Regra Jamildo 600x600) */
+        .container {
+            width: 600px;
+            height: 600px;
+            /* Cor Primária Jamildo como fundo "Espacial" */
+            background-color: #024796; 
+            border: 2px solid #FFF; 
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(248, 61, 3, 0.3); /* Brilho Laranja */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        /* 1.2: Canvas de Fundo (Animação Viva) */
+        #particle-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+
+        /* 1.3: Logo e Título (Regra Jamildo) */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            z-index: 50;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .logo-jamildo {
+            width: 130px;
+            height: auto;
+        }
+        .title {
+            font-size: 1.5rem; /* 24px */
+            font-weight: 900;
+            color: #FFF;
+            text-align: right;
+            line-height: 1.2;
+        }
+        .source-link {
+            font-size: 0.8rem;
+            font-weight: 400;
+            color: #FFF;
+            opacity: 0.6;
+            text-decoration: none;
+            transition: opacity 0.2s;
+            display: block;
+        }
+        .source-link:hover { opacity: 1; }
+
+        /* --- CAMADA 2: A METÁFORA VISUAL "CORRIDA DE FOGUETES" --- */
+
+        /* A "Pista" de Corrida (o palco) */
+        .scene {
+            position: relative;
+            width: 100%;
+            height: 400px; /* Altura da pista */
+            z-index: 10;
+        }
+        
+        /* 2.1: Wrapper para Foguete + Painel (para animar junto) */
+        .rocket-wrapper {
+            position: absolute;
+            left: 50%;
+            width: 140px; /* Largura do painel */
+            height: 220px; /* Altura painel (80) + foguete (120) + espaço (20) */
+            z-index: 20;
+            /* Animação da "Virada" (Física Rápida) */
+            transition: transform 2.5s cubic-bezier(0.64, 0.04, 0.35, 1);
+        }
+
+        /* Foguete Positivo (Laranja Jamildo) */
+        .rocket-wrapper.positive {
+            /* Posição Setembro (46.2%) - 262px (base do foguete) - 100px (painel+gap) = 162px */
+            transform: translateX(-140px) translateY(162px); 
+        }
+        .rocket-wrapper.positive.launched {
+            transform: translateX(-140px) translateY(0px); /* Posição Outubro (48.0%) */
+        }
+        
+        /* Foguete Negativo (Cinza) */
+        .rocket-wrapper.negative {
+            transform: translateX(20px) translateY(0px); /* Posição Setembro (48.0%) */
+        }
+        .rocket-wrapper.negative.launched {
+             /* 131px (base foguete) - 100px (painel+gap) = 31px */
+            transform: translateX(20px) translateY(31px);
+        }
+
+        /* 2.2: Os Foguetes (Atores) */
+        .rocket {
+            width: 80px;
+            height: 120px;
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        /* 2.3: O SVG do Foguete (Inovador) */
+        .rocket-svg {
+            width: 80px;
+            height: 120px;
+            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
+        }
+        .rocket-body-neg { fill: #B0BEC5; }
+        .rocket-body-pos { fill: #f83d03; } /* Laranja Jamildo */
+        .rocket-window { fill: #2196F3; }
+        .rocket-fin { fill: #9E9E9E; }
+        .rocket-fin-pos { fill: #D93603; } /* Laranja escuro */
+
+        /* 2.4: A Ignição (Animação de Fogo/Fumaça) */
+        .flame, .smoke {
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 50px;
+            opacity: 0;
+            transition: all 0.5s ease-out;
+        }
+        .rocket-wrapper.positive.launched .flame {
+            opacity: 1;
+            animation: flicker 0.2s infinite alternate;
+        }
+        .rocket-wrapper.negative.launched .smoke {
+            opacity: 1;
+            animation: puff 1s infinite ease-out;
+        }
+
+        @keyframes flicker {
+            0% { transform: translateX(-50%) scale(1, 1); }
+            100% { transform: translateX(-45%) scale(1.1, 0.9); }
+        }
+        @keyframes puff {
+            0% { transform: translateX(-50%) scale(0.5); opacity: 0; }
+            50% { opacity: 0.5; }
+            100% { transform: translateX(-60%) scale(1.5); opacity: 0; }
+        }
+        
+        /* 2.5: Os Painéis de Leitura (Números) */
+        .data-label {
+            width: 140px;
+            height: 80px;
+            /* Efeito "Vidro Fosco" */
+            background: rgba(255, 255, 255, 0.05);
+            -webkit-backdrop-filter: blur(5px);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 10px;
+            text-align: center;
+            color: #FFF;
+            position: absolute;
+            z-index: 25;
+            top: 0;
+            left: 0;
+        }
+        
+        .data-label h3 {
+            font-size: 0.9rem;
+            font-weight: 700;
+            opacity: 0.8;
+        }
+        .data-label .value {
+            font-size: 2.2rem; /* 36px */
+            font-weight: 900;
+            line-height: 1.2;
+        }
+        .data-label.positive .value {
+            color: #f83d03; /* Laranja Jamildo */
+        }
+
+        /* --- CAMADA 3: O BOTÃO DE AÇÃO --- */
+        .action-button {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.1rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            color: #024796; /* Azul no texto */
+            background-color: #f83d03; /* Laranja no fundo */
+            border: none;
+            padding: 15px 30px;
+            cursor: pointer;
+            text-align: center;
+            border-radius: 8px;
+            transition: all 0.2s ease-out;
+            width: 80%;
+            position: absolute;
+            bottom: 30px;
+            z-index: 100;
+            box-shadow: 0 5px 20px rgba(248, 61, 3, 0.3);
+        }
+        .action-button:hover {
+            background-color: #FFF; 
+            transform: scale(1.02);
+        }
+        .action-button:disabled {
+            background-color: #555;
+            color: #999;
+            cursor: not-allowed;
+            opacity: 0.7;
+            box-shadow: none;
+        }
+
+    </style>
+</head>
+<body>
+
+    <!-- O Contêiner 600x600 (Regra Jamildo) -->
+    <div class="container">
+        
+        <!-- Canvas para Fundo Animado "Vivo" -->
+        <canvas id="particle-canvas"></canvas>
+
+        <div class="header">
+            <img src="https://jamildo.com/media/uploads/brancologojamildo_6xe6mA0.png" 
+                 alt="Logo Jamildo" 
+                 class="logo-jamildo"
+                 onerror="this.src='https://placehold.co/130x40/FFF/024796?text=Jamildo';">
+            
+            <div class="title-area">
+                <h1 class="title">A Virada<br>da Aprovação</h1>
+                <a href="https://atlasintel.com.br/" target="_blank" class="source-link">Fonte: Atlas/Bloomberg</a>
+            </div>
+        </div>
+
+        <!-- Metáfora Visual "Corrida de Foguetes" -->
+        <div class="scene" id="scene">
+            
+            <!-- Wrapper Positivo (Foguete + Painel) -->
+            <div class="rocket-wrapper positive" id="wrapper-pos">
+                <!-- Painel de Leitura (Positivo) -->
+                <div class="data-label positive">
+                    <h3>Ótimo/Bom</h3>
+                    <div class="value" id="value-pos">46.2%</div>
+                </div>
+                <!-- Foguete Positivo (Laranja) -->
+                <div class="rocket" id="rocket-pos">
+                    <svg viewBox="0 0 100 150" class="rocket-svg">
+                        <path class="rocket-body-pos" d="M50 0 L80 60 H20 L50 0Z"/>
+                        <path class="rocket-body-pos" d="M20 60 H80 V120 H20 V60Z"/>
+                        <circle class="rocket-window" cx="50" cy="80" r="15"/>
+                        <path class="rocket-fin-pos" d="M20 90 L0 130 V110 L20 90Z"/>
+                        <path class="rocket-fin-pos" d="M80 90 L100 130 V110 L80 90Z"/>
+                    </svg>
+                    <!-- Animação de Fogo (Ignição) -->
+                    <svg viewBox="0 0 40 50" class="flame">
+                        <path fill="#FFEB3B" d="M20 50 C 30 40, 40 20, 20 0 C 0 20, 10 40, 20 50Z" 
+                            transform="scale(0.8) translate(5 0)"/>
+                        <path fill="#FFC107" d="M20 50 C 30 40, 35 25, 20 10 C 5 25, 10 40, 20 50Z"
+                            transform="scale(0.6) translate(13 8)"/>
+                    </svg>
+                </div>
+            </div>
+            
+            <!-- Wrapper Negativo (Foguete + Painel) -->
+            <div class="rocket-wrapper negative" id="wrapper-neg">
+                 <!-- Painel de Leitura (Negativo) -->
+                <div class="data-label negative">
+                    <h3>Ruim/Péssimo</h3>
+                    <div class="value" id="value-neg">48.0%</div>
+                </div>
+                <!-- Foguete Negativo (Cinza) -->
+                <div class="rocket" id="rocket-neg">
+                    <svg viewBox="0 0 100 150" class="rocket-svg">
+                        <path class="rocket-body-neg" d="M50 0 L80 60 H20 L50 0Z"/>
+                        <path class="rocket-body-neg" d="M20 60 H80 V120 H20 V60Z"/>
+                        <circle class="rocket-window" cx="50" cy="80" r="15"/>
+                        <path class="rocket-fin" d="M20 90 L0 130 V110 L20 90Z"/>
+                        <path class="rocket-fin" d="M80 90 L100 130 V110 L80 90Z"/>
+                    </svg>
+                    <!-- Animação de Fumaça (Falha) -->
+                    <svg viewBox="0 0 40 50" class="smoke">
+                        <circle fill="#E0E0E0" cx="20" cy="25" r="15"/>
+                    </svg>
+                </div>
+            </div>
+
+        </div>
+        
+        <!-- Botão de Ação -->
+        <button class="action-button" id="update-btn">
+            IGNIÇÃO! (Ver Virada de Outubro)
+        </button>
+
+    </div>
+
+    <script>
+        // --- LÓGICA (INOVAÇÃO E ZELO) ---
+
+        // 1. DADOS DA PESQUISA
+        const data = {
+            setembro: { pos: 46.2, neg: 48.0 },
+            outubro: { pos: 48.0, neg: 47.2 }
+        };
+
+        // 2. REFERÊNCIAS DO DOM
+        const wrapperPos = document.getElementById('wrapper-pos');
+        const wrapperNeg = document.getElementById('wrapper-neg');
+        const valuePos = document.getElementById('value-pos');
+        const valueNeg = document.getElementById('value-neg');
+        const updateBtn = document.getElementById('update-btn');
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let isLaunched = false;
+
+        // 3. ANIMAÇÃO DE FUNDO (CANVAS) - (Regra: Inovador, Fator Uau)
+        let particles = [];
+        canvas.width = 600;
+        canvas.height = 600;
+
+        function createParticles() {
+            for (let i = 0; i < 70; i++) {
+                particles.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    radius: Math.random() * 1.5,
+                    baseSpeed: Math.random() * 0.5 + 0.2,
+                    currentSpeed: Math.random() * 0.5 + 0.2
+                });
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+            
+            for (let i = 0; i < particles.length; i++) {
+                let p = particles[i];
+                p.y += p.currentSpeed; // Movimento para baixo (sensação de subida)
+                
+                // Acelera as partículas se a ignição ocorreu
+                if (isLaunched && p.currentSpeed < 10) {
+                    p.currentSpeed += 0.1; // Aceleração
+                }
+                // Desacelera de volta ao normal
+                if (!isLaunched && p.currentSpeed > p.baseSpeed) {
+                    p.currentSpeed -= 0.05;
+                }
+
+                if (p.y > canvas.height) {
+                    p.y = 0; // Reinicia no topo
+                    p.x = Math.random() * canvas.width;
+                }
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            // Chama a si mesmo para criar o loop (Regra Jamildo: requestAnimationFrame)
+            requestAnimationFrame(animateParticles);
+        }
+        
+        // 4. FUNÇÃO DE ANIMAÇÃO DE CONTAGEM (Zelo)
+        function animateValue(element, start, end, duration) {
+            let startTimestamp = null;
+            const step = (timestamp) => {
+                if (!startTimestamp) startTimestamp = timestamp;
+                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+                // Curva de "ease-out" para a contagem
+                const easeOutProgress = 1 - Math.pow(1 - progress, 3);
+                const currentValue = easeOutProgress * (end - start) + start;
+                element.textContent = currentValue.toFixed(1) + "%";
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            
+            // CORREÇÃO: Adicionando o delay de volta (1000ms)
+            // A animação do número só começa após 1s,
+            // sincronizando com a chegada dos foguetes (que dura 2.5s)
+            setTimeout(() => {
+                window.requestAnimationFrame(step);
+            }, 1000); 
+        }
+
+        // 5. FUNÇÃO PRINCIPAL DA "VIRADA" (Regra: Interação como Ponto de Virada)
+        function launch() {
+            if (isLaunched) return; // Só roda uma vez
+            isLaunched = true;
+
+            // Desativa o botão
+            updateBtn.textContent = "EM ASCENSÃO...";
+            updateBtn.disabled = true;
+
+            // 1. Animar os Números (com o delay corrigido)
+            animateValue(valuePos, data.setembro.pos, data.outubro.pos, 1500);
+            animateValue(valueNeg, data.setembro.neg, data.outubro.neg, 1500);
+
+            // 2. Animar os Foguetes (CSS)
+            wrapperPos.classList.add('launched');
+            wrapperNeg.classList.add('launched');
+            
+            setTimeout(() => {
+                updateBtn.textContent = "VIRADA CONCLUÍDA";
+            }, 2500);
+        }
+
+        // 6. INICIALIZAÇÃO
+        window.onload = () => {
+            // Define os valores iniciais (Setembro) assim que a página carrega
+            valuePos.textContent = data.setembro.pos.toFixed(1) + "%";
+            valueNeg.textContent = data.setembro.neg.toFixed(1) + "%";
+            
+            createParticles();
+            animateParticles();
+            updateBtn.addEventListener('click', launch);
+        };
+
+    </script>
+</body>
+</html>
+
